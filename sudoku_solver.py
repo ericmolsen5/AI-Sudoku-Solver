@@ -135,7 +135,7 @@ peers = dict((s, set(sum(units[s],[]))-set([s])) for s in boxes)
 
 # I'm not great at this, but this is the helper display function to print the
 # sudoku into an aesthetically pleasing console output
-
+# This only has a pretty print when it has singlt dots
 def display(values):
     width = 1+max(len(values[s]) for s in boxes)
     line = '+'.join(['-'*(width*3)]*3)
@@ -145,10 +145,65 @@ def display(values):
         if r in 'CF': print(line)
     return
 
+# The idea is to place all numbers (123456789) in the value is it's unassigned
 def grid_values(grid):
+    values = []
+    all_digits = '123456789'
+    for c in grid:
+        if c == '.':
+            values.append(all_digits)
+        elif c in all_digits:
+            values.append(c)
     assert len(grid) == 81
-    return dict(zip(boxes, grid))
+    return dict(zip(boxes, values))
 
+def eliminate(values):
+    # We'll operate on a copy named solved_values
+    # if a box is length one, it is a provided answer. Add it to list of solved values
+    solved_values = [box for box in values.keys() if len(values[box]) == 1]
+    # print(solved_values) # debugging
+    for box in solved_values:     # now we iterate over every box that is a solved value
+        digit = values[box]       # temp var for iterating across dict keys 
+        # print('-----------------')
+        # print('known answer:' + digit) # debugging
+        for peer in peers[box]: 
+            # print(box + ' : ' + values[peer]) # debugging 
+            values[peer] = values[peer].replace(digit,'')
+            # print(values[peer])  #debugging
+            # print('-------------------') #debugging
+    return values
+
+def only_choice(values):
+    for unit in unitlist:
+        for digit in '123456789':
+            poss_digits = [box for box in unit if digit in values[box]]
+            if len(poss_digits) == 1:
+                values[poss_digits[0]] = digit
+    return values
+
+
+
+# print(unsolved_puzzle)
+# print()
 puzzle = grid_values(unsolved_puzzle)
-# print(puzzle)
+# print()
 display(puzzle)
+print()
+# print(puzzle)
+# print()
+puzzle = eliminate(puzzle)
+display(puzzle)
+print()
+
+puzzle = only_choice(puzzle)
+display(puzzle)
+print()
+
+puzzle = eliminate(puzzle)
+display(puzzle)
+print()
+
+puzzle = only_choice(puzzle)
+display(puzzle)
+print()
+
