@@ -181,29 +181,32 @@ def only_choice(values):
                 values[poss_digits[0]] = digit
     return values
 
+def reduce_puzzle(values):
+    stalled = False
+    while not stalled:
+        # Check how many boxes have a determined value
+        solved_values_before = len([box for box in values.keys() if len(values[box]) == 1])
+        print("1:" + str(solved_values_before))
+        # Use the Eliminate Strategy
+        values = eliminate(values)
+        # Use the Only Choice Strategy
+        values = only_choice(values)
+        # Check how many boxes have a determined value, to compare
+        solved_values_after = len([box for box in values.keys() if len(values[box]) == 1])
+        print("2:" + str(solved_values_after))
+        # If no new values were added, stop the loop.
+        stalled = solved_values_before == solved_values_after
+        # Sanity check, return False if there is a box with zero available values:
+        if len([box for box in values.keys() if len(values[box]) == 0]):
+            return False
+    return values
 
 
-# print(unsolved_puzzle)
-# print()
 puzzle = grid_values(unsolved_puzzle)
-# print()
-display(puzzle)
-print()
-# print(puzzle)
-# print()
-puzzle = eliminate(puzzle)
+
 display(puzzle)
 print()
 
-puzzle = only_choice(puzzle)
-display(puzzle)
-print()
+puzzle = reduce_puzzle(puzzle)
 
-puzzle = eliminate(puzzle)
 display(puzzle)
-print()
-
-puzzle = only_choice(puzzle)
-display(puzzle)
-print()
-
